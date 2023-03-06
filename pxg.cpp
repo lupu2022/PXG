@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <iostream>
 
 #include <cuda_runtime.h>
@@ -9,16 +10,16 @@
 #include "embedding.hpp"
 
 int main(int argc, char* argv[]) {
-    MPI_Init(&argc, &argv);
-
     int world;
     int rank;
     ncclComm_t comm;
     ncclUniqueId id;
+
+    MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &world);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
     pxg_assert( world == 4, "This is a static setup with world = 4!");
+
     if ( rank == 0 ) {
         InputEmbedding* in = new InputEmbedding();
         in->run(rank);
@@ -29,21 +30,23 @@ int main(int argc, char* argv[]) {
         MPI_Send(&id, sizeof(id), MPI_BYTE, 2, 0, MPI_COMM_WORLD);
 
         cudaSetDevice(0);
-        ncclCommInitRank(&comm, 2, id, 0);
-        ncclCommDestroy(comm);
+        NCCLCHECK(ncclCommInitRank(&comm, 2, id, 0));
+        NCCLCHECK(ncclCommDestroy(comm));
     } else if ( rank == 2) {
         MPI_Recv(&id, sizeof(id), MPI_BYTE, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         std::cout << "Received id from another!" << std::endl;
 
         cudaSetDevice(1);
-        ncclCommInitRank(&comm, 2, id, 1);
-        ncclCommDestroy(comm);
+        NCCLCHECK(ncclCommInitRank(&comm, 2, id, 1));
+        NCCLCHECK(ncclCommDestroy(comm));
     } else if ( rank == 3) {
 
     } else {
 
         pxg_panic("Can't be here!");
     }
+
+    sleep(100);
 
     MPI_Finalize();
 }
