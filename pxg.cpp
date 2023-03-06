@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
     pxg_assert( world == 4, "This is a static setup with world = 4!");
 
     if ( rank == 0 ) {
+        // input embedding
         InputEmbedding* in = new InputEmbedding();
         in->run(rank);
         delete in;
@@ -31,6 +32,9 @@ int main(int argc, char* argv[]) {
 
         cudaSetDevice(0);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 0));
+
+        // Attention layer0~layer15, three pass, 5 layer per pass
+
         NCCLCHECK(ncclCommDestroy(comm));
     } else if ( rank == 2) {
         MPI_Recv(&id, sizeof(id), MPI_BYTE, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -38,11 +42,15 @@ int main(int argc, char* argv[]) {
 
         cudaSetDevice(1);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 1));
+
+        // Attention layer16~layer30, three pass, 5 layer per pass
+
         NCCLCHECK(ncclCommDestroy(comm));
     } else if ( rank == 3) {
+        // output embedded
+
 
     } else {
-
         pxg_panic("Can't be here!");
     }
 
