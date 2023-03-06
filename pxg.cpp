@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <cuda_runtime.h>
 #include <mpi.h>
 #include <nccl.h>
 
@@ -12,6 +13,8 @@ int main(int argc, char* argv[]) {
 
     int world;
     int rank;
+    ncclComm_t comm;
+    ncclUniqueId id;
     MPI_Comm_size(MPI_COMM_WORLD, &world);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -21,12 +24,24 @@ int main(int argc, char* argv[]) {
         in->run(rank);
         delete in;
     } else if ( rank == 1) {
+        ncclGetUniqueId(&id);
+        std::cout << "Sending id to another! " << std::endl;
+        MPI_Send(&id, sizeof(id), MPI_BYTE, 2, 0, MPI_COMM_WORLD);
 
+        cudaSetDevice(0);
+        ncclCommInitRank(&comm, 2, id, 0);
+        ncclCommDestroy(comm);
     } else if ( rank == 2) {
+        MPI_Recv(&id, sizeof(id), MPI_BYTE, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        std::cout << "Received id from another!" << std::endl;
 
-    } else if ( rank == 4) {
+        cudaSetDevice(1);
+        ncclCommInitRank(&comm, 2, id, 1);
+        ncclCommDestroy(comm);
+    } else if ( rank == 3) {
 
     } else {
+
         pxg_panic("Can't be here!");
     }
 

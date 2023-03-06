@@ -8,7 +8,7 @@ INC = -I/home/teaonly/opt/nccl/include \
 	  -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi 
 
 LINK = -L/home/teaonly/opt/nccl/lib -lnccl \
-	   -L/usr/local/cuda/lib64 -lcudnn \
+	   -L/usr/local/cuda/lib64 -lcudnn -lcudart \
 	   -L/usr/lib/x86_64-linux-gnu/openmpi/lib -lmpi -lmpi_cxx
 
 OBJS_DIR = ./objs
