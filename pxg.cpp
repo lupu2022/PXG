@@ -3,6 +3,10 @@
 #include <mpi.h>
 #include <nccl.h>
 
+#include "config.hpp"
+
+#include "pxg.hpp"
+
 int main(int argc, char* argv[]) {
     MPI_Init(&argc, &argv);
 
