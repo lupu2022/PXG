@@ -12,6 +12,10 @@ LINK = -L/home/teaonly/opt/nccl/lib -lnccl \
 	   -L/usr/local/cuda/lib64 -lcudnn -lcudart \
 	   -L/usr/lib/x86_64-linux-gnu/openmpi/lib -lmpi -lmpi_cxx
 
+ENGINE_LIBS = engine/build/liblskernels.a \
+		      engine/build/liblsops.a \
+		      engine/build/liblsflow.a
+
 OBJS_DIR = ./objs
 PXG_SRCS = pxg.cpp embedding.cpp
 PXG_OBJS = ${PXG_SRCS:%.cpp=$(OBJS_DIR)/%.o}
@@ -21,7 +25,7 @@ $(OBJS_DIR)/%.o : %.cpp
 	g++ $(FLAGS) $(INC) -c -o $@ $< 
 
 pxg: $(PXG_OBJS) 
-	g++ $(FLAGS) -o $@ $(PXG_OBJS) install/libls-kernels.a $(LINK)
+	g++ $(FLAGS) -o $@ $(PXG_OBJS) $(ENGINE_LIBS) $(LINK)
 
 clean:
 	rm -rf $(OBJS_DIR)
