@@ -21,6 +21,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
  
 find_package(CUDAToolkit REQUIRED cublas nvToolsExt)
+find_package(Threads REQUIRED)
 
 project(kernels LANGUAGES CUDA CXX)
 
@@ -43,10 +44,29 @@ set(cuda_kernel_files
     kernels/crf.cu
     kernels/transformerKernels.cc.cu)
 
-add_library(ls-kernels STATIC ${cuda_kernel_files})
-target_include_directories(ls-kernels PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
+add_library(lskernels STATIC ${cuda_kernel_files})
+target_include_directories(lskernels PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
 
-add_library(ls-layers STATIC linear.cpp)
-target_include_directories(ls-layers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/includes/layers")
-target_include_directories(ls-layers PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+add_library(
+    lsflow STATIC
+    lsflow/context.cpp
+    lsflow/node.cpp
+    lsflow/manager.cpp
+    lsflow/layer.cpp
+    lsflow/tensor.cpp
+    lsflow/allocator.cpp
+    lsflow/lsflow_util.cpp
+    lsflow/operator.cpp
+    lsflow/shape.cpp
+    lsflow/variable.cpp)
+target_include_directories(lsflow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/lsflow")
+target_include_directories(lsflow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
+target_include_directories(lsflow PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
+add_library(lslayers STATIC layers/linear.cpp)
+target_include_directories(lslayers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/layers")
+target_include_directories(lslayers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/lsflow")
+target_include_directories(lslayers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
+target_include_directories(lslayers PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
 
