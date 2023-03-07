@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 0));
 
 
+
         NCCLCHECK(ncclCommDestroy(comm));
     } else if ( rank == 2) {
         // Attention layer16~layer30, three pass, 5 layer per pass

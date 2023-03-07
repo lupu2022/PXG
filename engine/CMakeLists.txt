@@ -49,24 +49,25 @@ target_include_directories(lskernels PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include
 
 add_library(
     lsflow STATIC
-    lsflow/context.cpp
-    lsflow/node.cpp
-    lsflow/manager.cpp
-    lsflow/layer.cpp
-    lsflow/tensor.cpp
-    lsflow/allocator.cpp
-    lsflow/lsflow_util.cpp
-    lsflow/operator.cpp
-    lsflow/shape.cpp
-    lsflow/variable.cpp)
-target_include_directories(lsflow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/lsflow")
+    flow/context.cpp
+    flow/node.cpp
+    flow/manager.cpp
+    flow/layer.cpp
+    flow/tensor.cpp
+    flow/allocator.cpp
+    flow/lsflow_util.cpp
+    flow/operator.cpp
+    flow/shape.cpp
+    flow/variable.cpp)
+target_include_directories(lsflow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/flow")
 target_include_directories(lsflow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
 target_include_directories(lsflow PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_compile_definitions(lsflow PRIVATE LIGHTSEQ_cuda)
 
-add_library(lslayers STATIC layers/linear.cpp)
-target_include_directories(lslayers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/layers")
-target_include_directories(lslayers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/lsflow")
-target_include_directories(lslayers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
-target_include_directories(lslayers PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-
+add_library(lsops STATIC ops/linear.cpp)
+target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/ops")
+target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/flow")
+target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
+target_include_directories(lsops PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_compile_definitions(lsops PRIVATE LIGHTSEQ_cuda)
 
