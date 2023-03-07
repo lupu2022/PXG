@@ -45,29 +45,12 @@ set(cuda_kernel_files
     kernels/transformerKernels.cc.cu)
 
 add_library(lskernels STATIC ${cuda_kernel_files})
-target_include_directories(lskernels PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
+target_include_directories(lskernels PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/kernels/include")
 
-add_library(
-    lsflow STATIC
-    flow/context.cpp
-    flow/node.cpp
-    flow/manager.cpp
-    flow/layer.cpp
-    flow/tensor.cpp
-    flow/allocator.cpp
-    flow/lsflow_util.cpp
-    flow/operator.cpp
-    flow/shape.cpp
-    flow/variable.cpp)
-target_include_directories(lsflow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/flow")
-target_include_directories(lsflow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
-target_include_directories(lsflow PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-target_compile_definitions(lsflow PRIVATE LIGHTSEQ_cuda)
-
-add_library(lsops STATIC ops/linear.cpp)
-target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/ops")
-target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/flow")
-target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
-target_include_directories(lsops PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-target_compile_definitions(lsops PRIVATE LIGHTSEQ_cuda)
+#add_library(lsops STATIC ops/linear.cpp)
+#target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/ops")
+#target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/flow")
+#target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
+#target_include_directories(lsops PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+#target_compile_definitions(lsops PRIVATE LIGHTSEQ_cuda)
 

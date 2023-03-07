@@ -13,7 +13,7 @@
 
 inline void pxg__M_Assert(const char* expr_str, bool expr, const char* file, int line, const char* msg) {
     if (!expr) {
-        std::cerr << "Assert failed:\t" << msg << "\n"
+        std::cerr << "PXG::Assert failed:\t" << msg << "\n"
             << "Expected:\t" << expr_str << "\n"
             << "Source:\t\t" << file << ", line " << line << "\n";
         abort();
@@ -21,7 +21,7 @@ inline void pxg__M_Assert(const char* expr_str, bool expr, const char* file, int
 }
 
 inline void pxg__M_Panic(const char* file, int line, const char* msg) {
-    std::cerr << "Assert failed:\t" << msg << "\n"
+    std::cerr << "PXG::Panic:\t" << msg << "\n"
         << "Source:\t\t" << file << ", line " << line << "\n";
     abort();
 }

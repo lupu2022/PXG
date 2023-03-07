@@ -12,9 +12,7 @@ LINK = -L/home/teaonly/opt/nccl/lib -lnccl \
 	   -L/usr/local/cuda/lib64 -lcudnn -lcudart \
 	   -L/usr/lib/x86_64-linux-gnu/openmpi/lib -lmpi -lmpi_cxx
 
-ENGINE_LIBS = engine/build/liblskernels.a \
-		      engine/build/liblsops.a \
-		      engine/build/liblsflow.a
+ENGINE_LIBS = engine/build/liblskernels.a 
 
 OBJS_DIR = ./objs
 PXG_SRCS = pxg.cpp embedding.cpp
