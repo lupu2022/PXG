@@ -2,7 +2,8 @@
 all: pxg
 
 FLAGS = -Wall 
-INC = -I/home/teaonly/opt/nccl/include \
+INC = -I. -I/engine/includes \
+	  -I/home/teaonly/opt/nccl/include \
 	  -I/usr/local/cuda/include \
 	  -I/usr/lib/x86_64-linux-gnu/openmpi/include \
 	  -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi 
@@ -20,7 +21,7 @@ $(OBJS_DIR)/%.o : %.cpp
 	g++ $(FLAGS) $(INC) -c -o $@ $< 
 
 pxg: $(PXG_OBJS) 
-	g++ $(FLAGS) -o $@ $(PXG_OBJS) $(LINK)
+	g++ $(FLAGS) -o $@ $(PXG_OBJS) install/libls-kernels.a $(LINK)
 
 clean:
 	rm -rf $(OBJS_DIR)

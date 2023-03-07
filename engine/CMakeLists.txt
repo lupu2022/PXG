@@ -44,9 +44,9 @@ set(cuda_kernel_files
     kernels/transformerKernels.cc.cu)
 
 add_library(ls-kernels STATIC ${cuda_kernel_files})
-target_include_directories(ls-kernels PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/includes")
+target_include_directories(ls-kernels PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
 
-add_library(ls-layers STATIC layers.cpp)
-target_include_directories(ls-layers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/includes")
+add_library(ls-layers STATIC linear.cpp)
+target_include_directories(ls-layers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/includes/layers")
 target_include_directories(ls-layers PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
