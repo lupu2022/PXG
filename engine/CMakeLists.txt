@@ -47,10 +47,7 @@ set(cuda_kernel_files
 add_library(lskernels STATIC ${cuda_kernel_files})
 target_include_directories(lskernels PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/kernels/include")
 
-#add_library(lsops STATIC ops/linear.cpp)
-#target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/ops")
-#target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/flow")
-#target_include_directories(lsops PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/kernels")
-#target_include_directories(lsops PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-#target_compile_definitions(lsops PRIVATE LIGHTSEQ_cuda)
+add_library(tensortype STATIC tensortype.cpp)
+target_include_directories(tensortype PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/kernels/include")
+target_include_directories(tensortype PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
