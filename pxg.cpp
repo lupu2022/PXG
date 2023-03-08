@@ -18,7 +18,7 @@
 
 struct DeviceContext {
     DeviceContext(int device) : cuda_device_(device) {
-        CUDACHECK( cudaSetDevice(0) );
+        CUDACHECK( cudaSetDevice(device) );
         CUBLASCHECK( cublasCreate_v2(&cublas_handle_) );
     }
     ~DeviceContext() {
@@ -42,6 +42,8 @@ int main(int argc, char* argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     pxg_assert( world == 4, "This is a static setup with world = 4!");
 
+
+
     if ( rank == 0 ) {
         // input embedding
         InputEmbedding* in = new InputEmbedding();
@@ -53,24 +55,20 @@ int main(int argc, char* argv[]) {
         std::cout << "Sending id to another! " << std::endl;
         MPI_Send(&id, sizeof(id), MPI_BYTE, 2, 0, MPI_COMM_WORLD);
 
+        DeviceContext ctx(0);
+        tt::ComputingContext::init(ctx.cuda_device_, ctx.cublas_handle_);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 0));
-        {
-            DeviceContext ctx(0);
-            tt::ComputingContext::init(ctx.cuda_device_, ctx.cublas_handle_);
 
-        }
         NCCLCHECK(ncclCommDestroy(comm));
     } else if ( rank == 2) {
         // Attention layer16~layer30, three pass, 5 layer per pass
         MPI_Recv(&id, sizeof(id), MPI_BYTE, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         std::cout << "Received id from another!" << std::endl;
 
+        DeviceContext ctx(1);
+        tt::ComputingContext::init(ctx.cuda_device_, ctx.cublas_handle_);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 1));
-        {
-            DeviceContext ctx(1);
-            tt::ComputingContext::init(ctx.cuda_device_, ctx.cublas_handle_);
 
-        }
         NCCLCHECK(ncclCommDestroy(comm));
     } else if ( rank == 3) {
         // output embedded
