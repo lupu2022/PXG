@@ -2,6 +2,9 @@
 #define _PXG_ATTENTION_HPP_
 
 #include <vector>
+#include <cublasLt.h>
+#include <cuda_runtime_api.h>
+
 #include "config.hpp"
 #include "common.hpp"
 
@@ -10,6 +13,7 @@ struct DeviceContext {
         CUDACHECK( cudaSetDevice(cuda_device_) );
         CUDACHECK( cudaStreamCreate(&cuda_stream_) );
         CUBLASCHECK( cublasCreate_v2(&cublas_handle_) );
+        CUBLASCHECK( cublasLtCreate(&cublasLt_handle_) );
     }
     ~DeviceContext() {
         if ( cublas_handle_ != nullptr ) {
@@ -21,6 +25,7 @@ struct DeviceContext {
     const int ranks_;
     const int cuda_device_;
     cublasHandle_t cublas_handle_;
+    cublasLtHandle_t cublasLt_handle_;
     cudaStream_t cuda_stream_;
 };
 

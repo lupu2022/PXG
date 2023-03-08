@@ -29,27 +29,40 @@
 
 namespace tt {
 
-// some helping stuff
-extern int cuda_device;
-extern cublasHandle_t cublas_handle;
-
 template <DataType _DTYPE_>
 struct CUDATensor : public TransformerComputing {
     ~CUDATensor() {
         if (mem_ != nullptr) {
-            CUDA_CHECK(cudaFree(mem_));
+            //CUDA_CHECK(cudaFree(mem_));
         }
     }
 
-    CUDATensor(const ShapeType& shape) : shape_(shape.vec()), stride_(shape.dense_strides()) {
+    CUDATensor(const ShapeType& shape) : shape_(shape), stride_(shape.dense_strides()) {
         tt_assert(shape.vec().size() != 0, "Can't build tensor with zero shape!");
+        CUDA_CHECK(cudaMalloc(&mem_, shape_.numel() * DataType_size(_DTYPE_)));
     }
+
+    void* data() {
+        return mem_;
+    }
+    const std::vector<size_t>& dims() {
+        return shape_.vec();
+    }
+    const ShapeType& shape() {
+        return shape_;
+    }
+    const std::vector<size_t>& stride() {
+        return stride_;
+    }
+
+    virtual ComputingReturn op_linear(tensor_t x, tensor_t w, tensor_t b, tensor_t y);
 
 private:
     void*                       mem_;
-    const std::vector<size_t>   shape_;
+    ShapeType                   shape_;
     const std::vector<size_t>   stride_;
 };
+
 
 } // end of namespace
 #endif

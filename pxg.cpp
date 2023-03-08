@@ -14,7 +14,7 @@
 #include "embedding.hpp"
 #include "attention.hpp"
 
-#include "engine/tensortype.hpp"
+#include "tensortype/tensortype.hpp"
 
 int main(int argc, char* argv[]) {
     int world;
@@ -38,25 +38,22 @@ int main(int argc, char* argv[]) {
         MPI_Send(&id, sizeof(id), MPI_BYTE, 2, 0, MPI_COMM_WORLD);
 
         DeviceContext ctx(0, rank, world);
-        tt::ComputingContext::init(ctx.cuda_device_, ctx.cublas_handle_);
+        tt::ComputingContext::init(ctx.cuda_device_, ctx.cublas_handle_, ctx.cublasLt_handle_);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 0));
 
-        std::cout << rank << " GPU is ready!" << std::endl;
         AttentionBlock* block = new AttentionBlock(ctx);
         block->run(comm);
 
         NCCLCHECK(ncclCommDestroy(comm));
+
     } else if ( rank == 2) {
         // Attention layer16~layer30, three pass, 5 layer per pass
         MPI_Recv(&id, sizeof(id), MPI_BYTE, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         DeviceContext ctx(1, rank, world);
-        tt::ComputingContext::init(ctx.cuda_device_, ctx.cublas_handle_);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 1));
 
-        std::cout << rank << " GPU is ready!" << std::endl;
-        AttentionBlock* block = new AttentionBlock(ctx);
-        block->run(comm);
+        // TODO
 
         NCCLCHECK(ncclCommDestroy(comm));
     } else if ( rank == 3) {

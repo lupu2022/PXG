@@ -94,11 +94,11 @@ public:
     ShapeType() {numel_ = 0;}
     ShapeType(const std::vector<size_t>& dims) {
         size_t ND = dims.size();
-        dims_.resize(ND, 0);
+        dims_.resize(ND);
         for(size_t i = 0; i < ND; i++) {
             dims_[i] = dims[i];
         }
-
+        numel_ = 0;
     }
     // all kinds accessors
     size_t numel() {
@@ -171,21 +171,22 @@ private:
 
 // forward declare
 template <DataType _DTYPE_> struct CPUTensor;
-template <DataType _DTYPE_> struct CudaTensor;
+template <DataType _DTYPE_> struct CUDATensor;
 using cpu_float_t = CPUTensor<DataType::Float>;
 using cpu_bf16_t = CPUTensor<DataType::BF16>;
-using cuda_float_t = CudaTensor<DataType::Float>;
-using cuda_bf16_t = CudaTensor<DataType::BF16>;
+using cuda_float_t = CUDATensor<DataType::Float>;
+using cuda_bf16_t = CUDATensor<DataType::BF16>;
 
 struct TensorType;
 using tensor_t = std::shared_ptr<tt::TensorType>;
 
+// low level API for implementing Transformer
 struct TransformerComputing {
-    virtual ComputingReturn add(tensor_t x, tensor_t b, tensor_t c) {
+    virtual ComputingReturn op_linear(tensor_t x, tensor_t w, tensor_t bias, tensor_t y) {
         return TT_TODO_ERROR;
     }
 
-    virtual ComputingReturn linear(tensor_t x, tensor_t w, tensor_t bias, tensor_t y) {
+    virtual ComputingReturn op_add(tensor_t x, tensor_t b, tensor_t c) {
         return TT_TODO_ERROR;
     }
 };
@@ -196,8 +197,8 @@ public:
     // init functions
     TensorType() = delete;
     TensorType(cpu_float_t* tensor, const ShapeType& shape) : shape_(shape), dtype_(DataType::Float), impl_(tensor) {};
-    TensorType(cuda_float_t* tensor, const ShapeType& shape) : shape_(shape), dtype_(DataType::BF16), impl_(tensor) {};
-    TensorType(cpu_bf16_t* tensor, const ShapeType& shape) : shape_(shape), dtype_(DataType::Float), impl_(tensor) {};
+    TensorType(cuda_float_t* tensor, const ShapeType& shape) : shape_(shape), dtype_(DataType::Float), impl_(tensor) {};
+    TensorType(cpu_bf16_t* tensor, const ShapeType& shape) : shape_(shape), dtype_(DataType::BF16), impl_(tensor) {};
     TensorType(cuda_bf16_t* tensor, const ShapeType& shape) : shape_(shape), dtype_(DataType::BF16), impl_(tensor) {};
     ~TensorType();
 
@@ -305,12 +306,12 @@ public:
     TransformerComputing* impl();
 
 public:
-    virtual ComputingReturn add(tensor_t x, tensor_t b, tensor_t c) {
-        auto ret = impl()->add(x, b, c);
+    virtual ComputingReturn op_add(tensor_t x, tensor_t b, tensor_t c) {
+        auto ret = impl()->op_add(x, b, c);
         tt_check(ret, "add");
     }
-    virtual ComputingReturn linear(tensor_t x, tensor_t w, tensor_t b, tensor_t y) {
-        auto ret = impl()->linear(x, w, b, y);
+    virtual ComputingReturn op_linear(tensor_t x, tensor_t w, tensor_t b, tensor_t y) {
+        auto ret = impl()->op_linear(x, w, b, y);
         tt_check(ret, "linear");
     }
 
@@ -335,25 +336,19 @@ private:
 };
 
 // Public interfaces without impl
-static tensor_t new_tensor(cpu_float_t* tensor, const ShapeType& shape) {
-    return std::make_shared<TensorType>(tensor, shape);
-}
-static tensor_t new_tensor(cuda_float_t* tensor, const ShapeType& shape) {
-    return std::make_shared<TensorType>(tensor, shape);
-}
-static tensor_t new_tensor(cpu_bf16_t* tensor, const ShapeType& shape) {
-    return std::make_shared<TensorType>(tensor, shape);
-}
-static tensor_t new_tensor(cuda_bf16_t* tensor, const ShapeType& shape) {
-    return std::make_shared<TensorType>(tensor, shape);
-}
-
 struct ComputingContext {
     static int cuda_device;
     static cublasHandle_t cublas_handle;
-    static void init(int cud, cublasHandle_t cubh);
+    static cublasLtHandle_t cublasLt_handle;
+
+    static void* cuda_workspace;
+    static size_t cuda_workspace_size;
+
+    static void init(int cud, cublasHandle_t cubh, cublasLtHandle_t clth);
 };
 
+tensor_t create_cuda_float(std::vector<size_t> shape_);
+tensor_t create_cuda_bf16(std::vector<size_t> shape_);
 
 } // end of namespace tt
 

@@ -38,7 +38,7 @@ inline void pxg__M_Panic(const char* file, int line, const char* msg) {
 #define NCCLCHECK(cmd) do {                         \
   ncclResult_t r = cmd;                             \
   if (r!= ncclSuccess) {                            \
-    printf("Failed, NCCL error %s:%d '%s'\n",             \
+    printf("Failed, NCCL error %s:%d '%s'\n",       \
         __FILE__,__LINE__,ncclGetErrorString(r));   \
     exit(EXIT_FAILURE);                             \
   }                                                 \
@@ -47,7 +47,7 @@ inline void pxg__M_Panic(const char* file, int line, const char* msg) {
 #define CUDACHECK(cmd) do {                         \
   cudaError_t e = cmd;                              \
   if( e != cudaSuccess ) {                          \
-    printf("Failed: Cuda error %s:%d '%s'\n",             \
+    printf("Failed: Cuda error %s:%d '%s'\n",       \
         __FILE__,__LINE__,cudaGetErrorString(e));   \
     exit(EXIT_FAILURE);                             \
   }                                                 \
@@ -61,6 +61,5 @@ inline void pxg__M_Panic(const char* file, int line, const char* msg) {
     exit(EXIT_FAILURE);                                \
   }                                                    \
 } while(0)
-
 
 #endif
