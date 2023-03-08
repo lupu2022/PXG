@@ -329,20 +329,23 @@ private:
                                         cuda_bf16_t* >;
 
     TensorImpl impl_;
-public:
-    static tensor_t new_tensor(cpu_float_t* tensor, const ShapeType& shape) {
-        return std::make_shared<TensorType>(tensor, shape);
-    }
-    static tensor_t new_tensor(cuda_float_t* tensor, const ShapeType& shape) {
-        return std::make_shared<TensorType>(tensor, shape);
-    }
-    static tensor_t new_tensor(cpu_bf16_t* tensor, const ShapeType& shape) {
-        return std::make_shared<TensorType>(tensor, shape);
-    }
-    static tensor_t new_tensor(cuda_bf16_t* tensor, const ShapeType& shape) {
-        return std::make_shared<TensorType>(tensor, shape);
-    }
 };
+// Some public interfaces
+static tensor_t new_tensor(cpu_float_t* tensor, const ShapeType& shape) {
+    return std::make_shared<TensorType>(tensor, shape);
+}
+static tensor_t new_tensor(cuda_float_t* tensor, const ShapeType& shape) {
+    return std::make_shared<TensorType>(tensor, shape);
+}
+static tensor_t new_tensor(cpu_bf16_t* tensor, const ShapeType& shape) {
+    return std::make_shared<TensorType>(tensor, shape);
+}
+static tensor_t new_tensor(cuda_bf16_t* tensor, const ShapeType& shape) {
+    return std::make_shared<TensorType>(tensor, shape);
+}
+
+void cuda_init();
+
 
 } // end of namespace tt
 
