@@ -9,10 +9,11 @@ INC = -I. -I/engine/includes \
 	  -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi 
 
 LINK = -L/home/teaonly/opt/nccl/lib -lnccl \
-	   -L/usr/local/cuda/lib64 -lcudnn -lcudart \
+	   -L/usr/local/cuda/lib64 -lcudnn -lcudart -lcublas \
 	   -L/usr/lib/x86_64-linux-gnu/openmpi/lib -lmpi -lmpi_cxx
 
-ENGINE_LIBS = engine/build/liblskernels.a 
+ENGINE_LIBS = engine/build/liblskernels.a \
+			  engine/build/libtensortype.a
 
 OBJS_DIR = ./objs
 PXG_SRCS = pxg.cpp embedding.cpp

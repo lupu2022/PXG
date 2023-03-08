@@ -1,6 +1,10 @@
 #ifndef _TENSORTYPE_HPP_
 #define _TENSORTYPE_HPP_
 
+#include <cublas_v2.h>
+#include <cublasLt.h>
+#include <cuda.h>
+
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -191,10 +195,12 @@ struct TensorType: public TransformerComputing {
 public:
     // init functions
     TensorType() = delete;
+    /*
     TensorType(cpu_float_t* tensor, const ShapeType& shape);
     TensorType(cuda_float_t* tensor, const ShapeType& shape);
     TensorType(cpu_bf16_t* tensor, const ShapeType& shape);
     TensorType(cuda_bf16_t* tensor, const ShapeType& shape);
+    */
     ~TensorType();
 
     // fast access
@@ -330,7 +336,9 @@ private:
 
     TensorImpl impl_;
 };
-// Some public interfaces
+
+// Public interfaces without impl
+/*
 static tensor_t new_tensor(cpu_float_t* tensor, const ShapeType& shape) {
     return std::make_shared<TensorType>(tensor, shape);
 }
@@ -343,8 +351,13 @@ static tensor_t new_tensor(cpu_bf16_t* tensor, const ShapeType& shape) {
 static tensor_t new_tensor(cuda_bf16_t* tensor, const ShapeType& shape) {
     return std::make_shared<TensorType>(tensor, shape);
 }
+*/
 
-void cuda_init();
+struct ComputingContext {
+    static int cuda_device;
+    static cublasHandle_t cublas_handle;
+    static void init(int cud, cublasHandle_t cubh);
+};
 
 
 } // end of namespace tt

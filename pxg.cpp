@@ -1,6 +1,10 @@
 #include <unistd.h>
 #include <iostream>
 
+#include <cublas_v2.h>
+#include <cublasLt.h>
+#include <cuda.h>
+#include <cuda_bf16.h>
 #include <cuda_runtime.h>
 #include <mpi.h>
 #include <nccl.h>
@@ -8,6 +12,24 @@
 #include "common.hpp"
 #include "config.hpp"
 #include "embedding.hpp"
+#include "attention.hpp"
+
+#include "engine/tensortype.hpp"
+
+struct DeviceContext {
+    DeviceContext(int device) : cuda_device_(device) {
+        CUDACHECK( cudaSetDevice(0) );
+        CUBLASCHECK( cublasCreate_v2(&cublas_handle_) );
+    }
+    ~DeviceContext() {
+        if ( cublas_handle_ != nullptr ) {
+            CUBLASCHECK( cublasDestroy_v2(cublas_handle_) );
+        }
+    }
+
+    const int cuda_device_;
+    cublasHandle_t cublas_handle_;
+};
 
 int main(int argc, char* argv[]) {
     int world;
@@ -31,21 +53,24 @@ int main(int argc, char* argv[]) {
         std::cout << "Sending id to another! " << std::endl;
         MPI_Send(&id, sizeof(id), MPI_BYTE, 2, 0, MPI_COMM_WORLD);
 
-        cudaSetDevice(0);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 0));
+        {
+            DeviceContext ctx(0);
+            tt::ComputingContext::init(ctx.cuda_device_, ctx.cublas_handle_);
 
-
-
+        }
         NCCLCHECK(ncclCommDestroy(comm));
     } else if ( rank == 2) {
         // Attention layer16~layer30, three pass, 5 layer per pass
         MPI_Recv(&id, sizeof(id), MPI_BYTE, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         std::cout << "Received id from another!" << std::endl;
 
-        cudaSetDevice(1);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 1));
+        {
+            DeviceContext ctx(1);
+            tt::ComputingContext::init(ctx.cuda_device_, ctx.cublas_handle_);
 
-
+        }
         NCCLCHECK(ncclCommDestroy(comm));
     } else if ( rank == 3) {
         // output embedded
@@ -55,7 +80,7 @@ int main(int argc, char* argv[]) {
         pxg_panic("Can't be here!");
     }
 
-    sleep(100);
+    sleep(10);
 
     MPI_Finalize();
 }
