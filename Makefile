@@ -16,7 +16,7 @@ ENGINE_LIBS = engine/build/liblskernels.a \
 			  engine/build/libtensortype.a
 
 OBJS_DIR = ./objs
-PXG_SRCS = pxg.cpp embedding.cpp
+PXG_SRCS = pxg.cpp embedding.cpp attention.cpp
 PXG_OBJS = ${PXG_SRCS:%.cpp=$(OBJS_DIR)/%.o}
 
 $(OBJS_DIR)/%.o : %.cpp

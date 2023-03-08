@@ -195,12 +195,10 @@ struct TensorType: public TransformerComputing {
 public:
     // init functions
     TensorType() = delete;
-    /*
-    TensorType(cpu_float_t* tensor, const ShapeType& shape);
-    TensorType(cuda_float_t* tensor, const ShapeType& shape);
-    TensorType(cpu_bf16_t* tensor, const ShapeType& shape);
-    TensorType(cuda_bf16_t* tensor, const ShapeType& shape);
-    */
+    TensorType(cpu_float_t* tensor, const ShapeType& shape) : shape_(shape), dtype_(DataType::Float), impl_(tensor) {};
+    TensorType(cuda_float_t* tensor, const ShapeType& shape) : shape_(shape), dtype_(DataType::BF16), impl_(tensor) {};
+    TensorType(cpu_bf16_t* tensor, const ShapeType& shape) : shape_(shape), dtype_(DataType::Float), impl_(tensor) {};
+    TensorType(cuda_bf16_t* tensor, const ShapeType& shape) : shape_(shape), dtype_(DataType::BF16), impl_(tensor) {};
     ~TensorType();
 
     // fast access
@@ -240,7 +238,6 @@ public:
         }
         return std::get<CUDA_BF16>(impl_);
     }
-
 
     // help functions
     std::string to_string() {
@@ -338,7 +335,6 @@ private:
 };
 
 // Public interfaces without impl
-/*
 static tensor_t new_tensor(cpu_float_t* tensor, const ShapeType& shape) {
     return std::make_shared<TensorType>(tensor, shape);
 }
@@ -351,7 +347,6 @@ static tensor_t new_tensor(cpu_bf16_t* tensor, const ShapeType& shape) {
 static tensor_t new_tensor(cuda_bf16_t* tensor, const ShapeType& shape) {
     return std::make_shared<TensorType>(tensor, shape);
 }
-*/
 
 struct ComputingContext {
     static int cuda_device;
