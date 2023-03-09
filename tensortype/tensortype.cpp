@@ -1,24 +1,37 @@
 #include "tensortype.hpp"
-#include "cpu_impl.hpp"
-#include "cuda_impl.hpp"
+#include "cpu_tensor.hpp"
+#include "cuda_tensor.hpp"
 
 namespace tt {
 
 int ComputingContext::cuda_device = -1;
+cudaStream_t ComputingContext::cuda_stream = nullptr;
 cublasHandle_t ComputingContext::cublas_handle = nullptr;
 cublasLtHandle_t ComputingContext::cublasLt_handle = nullptr;
+cudnnHandle_t ComputingContext::cudnn_handle = nullptr;
 void* ComputingContext::cuda_workspace = nullptr;
 size_t ComputingContext::cuda_workspace_size = 0;
 
-void ComputingContext::init(int cud, cublasHandle_t cubh, cublasLtHandle_t clth) {
+void ComputingContext::boot(int cud) {
     cuda_device = cud;
-    cublas_handle = cubh;
-    cublasLt_handle = clth;
+
+    CUDA_CHECK( cudaSetDevice(cuda_device) );
+    CUDA_CHECK( cudaStreamCreate(&cuda_stream) );
+
+    CUBLAS_CHECK( cublasCreate_v2(&cublas_handle) );
+    CUBLAS_CHECK( cublasLtCreate(&cublasLt_handle) );
+
+    CUDNN_CHECK(cudnnCreate(&cudnn_handle));
 
     cuda_workspace_size = 1024 * 1024 * 32;
     CUDA_CHECK( cudaMalloc(&cuda_workspace, cuda_workspace_size) );
 }
 
+void ComputingContext::shutdown() {
+    CUBLAS_CHECK( cublasLtDestroy(cublasLt_handle) );
+    CUBLAS_CHECK( cublasDestroy(cublas_handle) );
+    CUDA_CHECK( cudaStreamDestroy(cuda_stream) );
+}
 
 TensorType::~TensorType() {
     if ( impl_index() == ImplType::CUDA_FLOAT ) {

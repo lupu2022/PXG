@@ -1,4 +1,4 @@
-#include "cuda_impl.hpp"
+#include "cuda_tensor.hpp"
 #include "kernels/LtSgemm.h"
 
 namespace tt {
@@ -23,9 +23,26 @@ ComputingReturn CUDATensor<DT>::op_linear(tensor_t x_, tensor_t w_, tensor_t b_,
         float* A = (float *)w->data();
         float* B = (float *)x->data();
         float* C = (float *)y->data();
+        void* bias = b->data();
 
         float alpha = 1.0;
         float beta = 0.0;
+
+        /*
+        auto stream = ComputingContext::cuda_stream;
+        std::vector<float> localA;
+        localA.resize(inSize, 0.1);
+
+        std::vector<float> localB;
+        localB.resize(inSize, 3.14);
+
+        std::vector<float> localBias;
+        localBias.resize(inSize, 1000.0);
+
+        CUDA_CHECK( cudaMemcpyAsync(A, localA.data(), localA.size() * sizeof(float), cudaMemcpyHostToDevice, stream));
+        CUDA_CHECK( cudaMemcpyAsync(B, localB.data(), localB.size() * sizeof(float), cudaMemcpyHostToDevice, stream));
+        CUDA_CHECK( cudaMemcpyAsync(bias, localBias.data(), localBias.size() * sizeof(float), cudaMemcpyHostToDevice, stream));
+        */
 
         LtSgemm(ComputingContext::cublasLt_handle,
                 CUBLAS_OP_T, CUBLAS_OP_N,
@@ -35,6 +52,22 @@ ComputingReturn CUDATensor<DT>::op_linear(tensor_t x_, tensor_t w_, tensor_t b_,
                 C, m,
                 ComputingContext::cuda_workspace,
                 ComputingContext::cuda_workspace_size);
+
+        {
+            auto ydesc = y->create_cudnn_td_with({batch, 1, tokens, outSize});
+            auto bdesc = b->create_cudnn_td_with({1, 1, 1, outSize});
+
+            beta = 1.0;
+            CUDNN_CHECK( cudnnAddTensor(ComputingContext::cudnn_handle,
+                                        &alpha, bdesc, bias,
+                                        &beta, ydesc, C));
+        }
+
+        /*
+        CUDA_CHECK(cudaMemcpyAsync(localA.data(), C, localA.size() * sizeof(float), cudaMemcpyDeviceToHost, stream));
+        CUDA_CHECK(cudaStreamSynchronize(stream));
+        std::cout << " ##################### " <<  localA[0] << std::endl;
+        */
 
         return TT_OK;
     }

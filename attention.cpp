@@ -18,6 +18,7 @@ void AttentionBlock::run(ncclComm_t comm) {
 
     tt::tensor_t y = tt::create_cuda_float( {SUB_BATCH, MAX_LENGTH, HIDDEN_SIZE * 3} );
 
+
     auto start = std::chrono::high_resolution_clock::now();
     x->op_linear(x, w, b, y);
     auto stop = std::chrono::high_resolution_clock::now();

@@ -4,6 +4,7 @@
 #include <cublas_v2.h>
 #include <cublasLt.h>
 #include <cuda.h>
+#include <cudnn.h>
 
 #include <iostream>
 #include <memory>
@@ -338,13 +339,16 @@ private:
 // Public interfaces without impl
 struct ComputingContext {
     static int cuda_device;
+    static cudaStream_t cuda_stream;
     static cublasHandle_t cublas_handle;
     static cublasLtHandle_t cublasLt_handle;
+    static cudnnHandle_t cudnn_handle;
 
     static void* cuda_workspace;
     static size_t cuda_workspace_size;
 
-    static void init(int cud, cublasHandle_t cubh, cublasLtHandle_t clth);
+    static void boot(int cud);
+    static void shutdown();
 };
 
 tensor_t create_cuda_float(std::vector<size_t> shape_);

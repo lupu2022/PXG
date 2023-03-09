@@ -37,25 +37,25 @@ int main(int argc, char* argv[]) {
         ncclGetUniqueId(&id);
         MPI_Send(&id, sizeof(id), MPI_BYTE, 2, 0, MPI_COMM_WORLD);
 
-        DeviceContext ctx(0, rank, world);
-        tt::ComputingContext::init(ctx.cuda_device_, ctx.cublas_handle_, ctx.cublasLt_handle_);
+        tt::ComputingContext::boot(0);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 0));
 
-        AttentionBlock* block = new AttentionBlock(ctx);
+        AttentionBlock* block = new AttentionBlock();
         block->run(comm);
 
         NCCLCHECK(ncclCommDestroy(comm));
-
+        tt::ComputingContext::shutdown();
     } else if ( rank == 2) {
         // Attention layer16~layer30, three pass, 5 layer per pass
         MPI_Recv(&id, sizeof(id), MPI_BYTE, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        DeviceContext ctx(1, rank, world);
+        tt::ComputingContext::boot(1);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 1));
 
         // TODO
 
         NCCLCHECK(ncclCommDestroy(comm));
+        tt::ComputingContext::shutdown();
     } else if ( rank == 3) {
         // output embedded
 
