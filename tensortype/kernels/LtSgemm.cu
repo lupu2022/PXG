@@ -27,8 +27,24 @@
  */
 
 #include <cublasLt.h>
+#include <stdexcept>
 
-#include "LtSgemm.h"
+namespace kernels {
+
+inline void checkCudaStatus(cudaError_t status) {
+    if (status != cudaSuccess) {
+        printf("cuda API failed with status %d: %s\n", status, cudaGetErrorString(status));
+        throw std::logic_error("cuda API failed");
+    }
+}
+
+inline void checkCublasStatus(cublasStatus_t status) {
+    if (status != CUBLAS_STATUS_SUCCESS) {
+        printf("cuBLAS API failed with status %d\n", status);
+        throw std::logic_error("cuBLAS API failed");
+    }
+}
+
 
 /// Sample wrapper executing single precision gemm with cublasLtMatmul, nearly a drop-in replacement for cublasSgemm,
 /// with addition of the workspace to support split-K algorithms
@@ -108,3 +124,5 @@ void LtSgemm(cublasLtHandle_t ltHandle,
     if (Adesc) checkCublasStatus(cublasLtMatrixLayoutDestroy(Adesc));
     if (operationDesc) checkCublasStatus(cublasLtMatmulDescDestroy(operationDesc));
 }
+
+} // endof cuda

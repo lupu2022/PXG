@@ -1,5 +1,5 @@
 #include "cuda_tensor.hpp"
-#include "kernels/LtSgemm.h"
+#include "kernels/kernels.h"
 
 namespace tt {
 
@@ -44,7 +44,7 @@ ComputingReturn CUDATensor<DT>::op_linear(tensor_t x_, tensor_t w_, tensor_t b_,
         CUDA_CHECK( cudaMemcpyAsync(bias, localBias.data(), localBias.size() * sizeof(float), cudaMemcpyHostToDevice, stream));
         */
 
-        LtSgemm(ComputingContext::cublasLt_handle,
+        kernels::LtSgemm(ComputingContext::cublasLt_handle,
                 CUBLAS_OP_T, CUBLAS_OP_N,
                 m, n, k,
                 &alpha, A, k,
@@ -113,7 +113,6 @@ std::variant<ComputingReturn, std::vector<tensor_t>> CUDATensor<DT>::op_split_qk
     }
     return TT_TODO_ERROR;
 }
-
 
 tensor_t create_cuda_float(std::vector<size_t> shape_) {
     ShapeType shape(shape_);

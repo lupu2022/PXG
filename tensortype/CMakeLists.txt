@@ -22,5 +22,8 @@ project(tensortype LANGUAGES CUDA CXX)
 find_package(CUDAToolkit REQUIRED cublas nvToolsExt)
 find_package(Threads REQUIRED)
 
-add_library(tensortype STATIC tensortype.cpp cuda_tensor.cpp kernels/LtSgemm.cu)
+add_library(tensortype STATIC tensortype.cpp 
+                              cuda_tensor.cpp 
+                              kernels/LtSgemm.cu
+                              kernels/transform_kernels.cu)
 target_include_directories(tensortype PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
