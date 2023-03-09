@@ -190,6 +190,10 @@ struct TransformerComputing {
     virtual ComputingReturn op_add(tensor_t x, tensor_t b, tensor_t c) {
         return TT_TODO_ERROR;
     }
+
+    virtual std::variant<ComputingReturn, std::vector<tensor_t>> op_split_qkv(tensor_t x, int heads) {
+        return TT_TODO_ERROR;
+    }
 };
 
 // TensorType is all you need
@@ -314,6 +318,15 @@ public:
     virtual ComputingReturn op_linear(tensor_t x, tensor_t w, tensor_t b, tensor_t y) {
         auto ret = impl()->op_linear(x, w, b, y);
         tt_check(ret, "linear");
+    }
+
+    virtual std::variant<ComputingReturn, std::vector<tensor_t>> op_split_qkv(tensor_t x, int heads) {
+        auto result = impl()->op_split_qkv(x, heads);
+        if ( result.index() != 0) {
+            ComputingReturn ret = std::get<0>(result);
+            tt_check(ret, "split_qkv");
+        }
+        return result;
     }
 
 private:

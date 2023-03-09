@@ -50,6 +50,10 @@ struct CUDATensor : public TransformerComputing {
         CUDA_CHECK(cudaMalloc(&mem_, shape_.numel() * DataType_size(_DTYPE_)));
     }
 
+    CUDATensor(void *mem, const ShapeType& shape, const std::vector<size_t> stride) : mem_(mem), shape_(shape), stride_(stride), owner_(false) {
+        tt_assert(shape.vec().size() != 0, "Can't build tensor with zero shape!");
+    }
+
     void* data() {
         return mem_;
     }
@@ -98,6 +102,7 @@ struct CUDATensor : public TransformerComputing {
     }
 
     virtual ComputingReturn op_linear(tensor_t x, tensor_t w, tensor_t b, tensor_t y);
+    virtual std::variant<ComputingReturn, std::vector<tensor_t>> op_split_qkv(tensor_t x, int heads);
 
 private:
     void*                       mem_;
