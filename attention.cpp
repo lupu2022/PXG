@@ -33,11 +33,11 @@ CausalSelfAttention::CausalSelfAttention(const char* weights_file) {
     create_local_tensors();
 }
 
-CausalSelfAttention::CausalSelfAttention(std::vector<tensor_t>& weights) {
+CausalSelfAttention::CausalSelfAttention(std::vector<tt::tensor_t>& weights) {
     create_local_tensors();
 }
 
-CausalSelfAttention::create_local_tensors() {
+void CausalSelfAttention::create_local_tensors() {
     // create weight tensors
     qkv_w_ =  tt::create_cuda_float( {3, HIDDEN_SIZE, HIDDEN_SIZE} );
     qkv_b_ = tt::create_cuda_float( {3, HIDDEN_SIZE} );
@@ -53,27 +53,29 @@ CausalSelfAttention::create_local_tensors() {
     _out_b_ = tt::create_cuda_float( {HIDDEN_SIZE} );
 }
 
-CausalSelfAttention::zeor_grad() {
-    qkv_w_->zero_();
-    qkv_b_->zero_();
-    out_w_->zero_();
-    out_b_->zero_();
+void CausalSelfAttention::zero_grad() {
+    qkv_w_->op_zero();
+    qkv_b_->op_zero();
+    out_w_->op_zero();
+    out_b_->op_zero();
 }
 
-CausalSelfAttention::weights() {
-    std::vector<tensor_t> ret{qkv_w_, qkv_b_, out_w_, out_b_};
+std::vector<tt::tensor_t> CausalSelfAttention::weights() {
+    std::vector<tt::tensor_t> ret{qkv_w_, qkv_b_, out_w_, out_b_};
     return ret;
 }
 
-CausalSelfAttention::grads() {
-    std::vector<tensor_t> ret{_qkv_w_, _qkv_b_, _out_w_, _out_b_};
+std::vector<tt::tensor_t> CausalSelfAttention::grads() {
+    std::vector<tt::tensor_t> ret{_qkv_w_, _qkv_b_, _out_w_, _out_b_};
     return ret;
 }
 
-tensor_t CausalSelfAttention::forward(tensor_t x) {
-
+tt::tensor_t CausalSelfAttention::forward(tt::tensor_t x) {
+    return x;
 }
 
-
+tt::tensor_t CausalSelfAttention::backward(tt::tensor_t grad) {
+    return grad;
+}
 
 

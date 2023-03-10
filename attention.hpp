@@ -13,18 +13,18 @@
 
 struct CausalSelfAttention {
     CausalSelfAttention(const char* weights_file);
-    CausalSelfAttention(std::vector<tensor_t>& weights);
+    CausalSelfAttention(std::vector<tt::tensor_t>& weights);
     ~CausalSelfAttention();
 
     void zero_grad();
-    std::vector<tensor_t> weights();
-    std::vector<tensor_t> grads();
+    std::vector<tt::tensor_t> weights();
+    std::vector<tt::tensor_t> grads();
 
-    tensor_t forward(tensor_t x);
-    tensor_t backward(tensor_t _x);
+    tt::tensor_t forward(tt::tensor_t x);
+    tt::tensor_t backward(tt::tensor_t _x);
 
 private:
-    create_local_tensors();
+    void create_local_tensors();
 
 private:
     // from embedded to q,k,v
@@ -39,7 +39,7 @@ private:
     tt::tensor_t    out_b_;
 
     tt::tensor_t    _out_w_;
-    tt::tesnor_t    _out_b_;
+    tt::tensor_t    _out_b_;
 };
 
 #endif

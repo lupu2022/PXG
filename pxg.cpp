@@ -40,8 +40,11 @@ int main(int argc, char* argv[]) {
         tt::ComputingContext::boot(0);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 0));
 
-        AttentionBlock* block = new AttentionBlock();
-        block->run(comm);
+        new CausalSelfAttention("");
+        new CausalSelfAttention("");
+        new CausalSelfAttention("");
+
+        sleep(10);
 
         NCCLCHECK(ncclCommDestroy(comm));
         tt::ComputingContext::shutdown();
@@ -52,7 +55,9 @@ int main(int argc, char* argv[]) {
         tt::ComputingContext::boot(1);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 1));
 
-        // TODO
+        CausalSelfAttention* att = new CausalSelfAttention("");
+
+        sleep(10);
 
         NCCLCHECK(ncclCommDestroy(comm));
         tt::ComputingContext::shutdown();
@@ -63,8 +68,6 @@ int main(int argc, char* argv[]) {
     } else {
         pxg_panic("Can't be here!");
     }
-
-    sleep(10);
 
     MPI_Finalize();
 }
