@@ -4,9 +4,9 @@
 namespace tt {
 
 template<DataType DT>
-ComputingReturn CUDATensor<DT>::op_linear(tensor_t x_, tensor_t w_, tensor_t b_, tensor_t y_) {
+ComputingReturn CUDATensor<DT>::op_linear(tensor_t w_, tensor_t b_, tensor_t y_) {
     if ( DT == DataType::Float ) {
-        auto x = x_->cuda_float();
+        auto x = this;
         auto w = w_->cuda_float();
         auto b = b_->cuda_float();
         auto y = y_->cuda_float();
@@ -75,11 +75,13 @@ ComputingReturn CUDATensor<DT>::op_linear(tensor_t x_, tensor_t w_, tensor_t b_,
     return TT_TODO_ERROR;
 }
 
+
 /*
     batch_size, seq_length, three_times_hidden_size = fused_qkv.shape
     fused_qkv = fused_qkv.view(batch_size, seq_length, self.num_heads, 3, self.head_dim)
     return fused_qkv[..., 0, :], fused_qkv[..., 1, :], fused_qkv[..., 2, :]
  */
+#if 0
 template<DataType DT>
 std::variant<ComputingReturn, std::vector<tensor_t>> CUDATensor<DT>::op_split_qkv(tensor_t x_, int heads) {
     if ( DT == DataType::Float ) {
@@ -113,6 +115,8 @@ std::variant<ComputingReturn, std::vector<tensor_t>> CUDATensor<DT>::op_split_qk
     }
     return TT_TODO_ERROR;
 }
+#endif
+
 
 tensor_t create_cuda_float(std::vector<size_t> shape_) {
     ShapeType shape(shape_);

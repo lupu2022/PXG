@@ -52,7 +52,6 @@ enum ComputingReturn {
 };
 
 enum DataType {
-    Any = -1,
     Float = 0,
     F16 = 1,
     BF16 = 2,
@@ -74,8 +73,6 @@ inline size_t DataType_size(DataType type_) {
 
 inline const char* DataType_name(DataType type_) {
     switch( type_ ) {
-        case Any:
-            return "Any(scalar)";
         case Float:
             return "f32";
         case F16:
@@ -183,15 +180,15 @@ using tensor_t = std::shared_ptr<tt::TensorType>;
 
 // low level API for implementing Transformer
 struct TransformerComputing {
-    virtual ComputingReturn op_linear(tensor_t x, tensor_t w, tensor_t bias, tensor_t y) {
+    virtual ComputingReturn op_zero() {
         return TT_TODO_ERROR;
     }
 
-    virtual ComputingReturn op_add(tensor_t x, tensor_t b, tensor_t c) {
+    virtual ComputingReturn op_linear(tensor_t w, tensor_t bias, tensor_t y) {
         return TT_TODO_ERROR;
     }
 
-    virtual std::variant<ComputingReturn, std::vector<tensor_t>> op_split_qkv(tensor_t x, int heads) {
+    virtual ComputingReturn op_add(tensor_t b, tensor_t c) {
         return TT_TODO_ERROR;
     }
 };
@@ -311,15 +308,19 @@ public:
     TransformerComputing* impl();
 
 public:
-    virtual ComputingReturn op_add(tensor_t x, tensor_t b, tensor_t c) {
-        auto ret = impl()->op_add(x, b, c);
+    virtual ComputingReturn op_zero() {
+        auto ret = impl()->op_zero();
+        tt_check(ret, "zero");
+    }
+    virtual ComputingReturn op_add(tensor_t b, tensor_t c) {
+        auto ret = impl()->op_add(b, c);
         tt_check(ret, "add");
     }
-    virtual ComputingReturn op_linear(tensor_t x, tensor_t w, tensor_t b, tensor_t y) {
-        auto ret = impl()->op_linear(x, w, b, y);
+    virtual ComputingReturn op_linear(tensor_t w, tensor_t b, tensor_t y) {
+        auto ret = impl()->op_linear(w, b, y);
         tt_check(ret, "linear");
     }
-
+    /*
     virtual std::variant<ComputingReturn, std::vector<tensor_t>> op_split_qkv(tensor_t x, int heads) {
         auto result = impl()->op_split_qkv(x, heads);
         if ( result.index() != 0) {
@@ -328,6 +329,7 @@ public:
         }
         return result;
     }
+    */
 
 private:
     // basic info about tensor
