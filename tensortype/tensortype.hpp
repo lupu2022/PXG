@@ -323,6 +323,9 @@ public:
     }
 
     TransformerComputing* impl();
+    void copy_to_cpu(tensor_t cpu_dst);
+    void copy_from_cpu(tensor_t cpu_src);
+
 
 public:
     virtual ComputingReturn op_zero() {

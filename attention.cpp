@@ -31,10 +31,17 @@ void AttentionBlock::run(ncclComm_t comm) {
 
 CausalSelfAttention::CausalSelfAttention(const char* weights_file) {
     create_local_tensors();
+    // TODO
 }
 
 CausalSelfAttention::CausalSelfAttention(std::vector<tt::tensor_t>& weights) {
     create_local_tensors();
+
+    qkv_w_->copy_from_cpu( weights[0] );
+    qkv_b_->copy_from_cpu( weights[1] );
+
+    out_w_->copy_from_cpu( weights[2] );
+    out_b_->copy_from_cpu( weights[3] );
 }
 
 void CausalSelfAttention::create_local_tensors() {

@@ -58,5 +58,13 @@ TransformerComputing* TensorType::impl() {
     return nullptr;
 }
 
+void TensorType::copy_to_cpu(tensor_t cpu_dst){
+
+}
+
+void TensorType::copy_from_cpu(tensor_t cpu_src){
+
+}
+
 }
 
