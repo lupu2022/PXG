@@ -45,7 +45,7 @@ struct CUDATensor : public TransformerComputing {
         }
     }
 
-    CUDATensor(const ShapeType& shape) : shape_(shape), stride_(shape.dense_strides()), owner_(true) {
+    CUDATensor(const ShapeType& shape) : shape_(shape), stride_( ShapeType::dense_stride(shape.vec()) ), owner_(true) {
         tt_assert(shape.vec().size() != 0, "Can't build tensor with zero shape!");
         CUDA_CHECK(cudaMalloc(&mem_, shape_.numel() * DataType_size(_DTYPE_)));
     }
@@ -112,11 +112,12 @@ struct CUDATensor : public TransformerComputing {
     // Interfaces from TransformerComputing
     virtual ComputingReturn op_dump(tensor_t self);
     virtual ComputingReturn op_zero(tensor_t self);
+    virtual ComputingReturn op_fill(tensor_t self, float value, size_t begin, size_t len);
     virtual ComputingReturn op_linear(tensor_t self, tensor_t w, tensor_t b, tensor_t y);
 
 private:
     void*                       mem_;
-    ShapeType                   shape_;
+    const ShapeType             shape_;
     const std::vector<size_t>   stride_;
     const bool                  owner_;
 };

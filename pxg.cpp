@@ -40,7 +40,8 @@ int main(int argc, char* argv[]) {
         tt::ComputingContext::boot(0);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 0));
 
-        auto selfattn = new CausalSelfAttention("");
+        auto attn = new CausalSelfAttention("");
+        attn->test();
 
         sleep(10);
 
@@ -53,9 +54,10 @@ int main(int argc, char* argv[]) {
         tt::ComputingContext::boot(1);
         NCCLCHECK(ncclCommInitRank(&comm, 2, id, 1));
 
+        /*
         CausalSelfAttention* att = new CausalSelfAttention("");
-
         sleep(10);
+        */
 
         NCCLCHECK(ncclCommDestroy(comm));
         tt::ComputingContext::shutdown();

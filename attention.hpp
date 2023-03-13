@@ -23,6 +23,7 @@ struct CausalSelfAttention {
     tt::tensor_t forward(tt::tensor_t x);
     tt::tensor_t backward(tt::tensor_t _x);
 
+    void test();
 private:
     void create_local_tensors();
 

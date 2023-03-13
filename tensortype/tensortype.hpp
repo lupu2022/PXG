@@ -99,7 +99,7 @@ public:
         numel_ = 0;
     }
     // all kinds accessors
-    size_t numel() {
+    size_t numel() const {
         if ( numel_ != 0) {
             return numel_;
         }
@@ -150,13 +150,19 @@ public:
         return ss.str();
     }
 
-    std::vector<size_t> dense_strides() const {
+    static bool is_dense(const ShapeType& shape, const std::vector<size_t> stride) {
+        auto dstride = dense_stride(shape);
+        return dstride == stride;
+    }
+
+    static std::vector<size_t> dense_stride(const ShapeType& shape) {
+        auto dims = shape.vec();
         uint64_t s = 1;
         std::vector<size_t> stride;
 
-        for (int i = dims_.size() - 1; i >= 0; i--) {
+        for (int i = dims.size() - 1; i >= 0; i--) {
             stride.push_back(s);
-            s = s * dims_[i];
+            s = s * dims[i];
         }
         std::reverse(stride.begin(), stride.end());
         return stride;
@@ -164,7 +170,7 @@ public:
 
 private:
     std::vector<size_t>  dims_;
-    size_t numel_;
+    mutable size_t numel_;
 };
 
 // forward declare
@@ -184,6 +190,9 @@ struct TransformerComputing {
         return TT_TODO_ERROR;
     }
     virtual ComputingReturn op_zero(tensor_t self) {
+        return TT_TODO_ERROR;
+    }
+    virtual ComputingReturn op_fill(tensor_t self, float value, size_t begin, size_t len) {
         return TT_TODO_ERROR;
     }
 
@@ -339,6 +348,11 @@ public:
     virtual ComputingReturn op_zero(tensor_t self) {
         tt_assert(self.get() == this, "can't be here!");
         auto ret = impl()->op_zero(self);
+        tt_check(ret, "zero");
+    }
+    virtual ComputingReturn op_fill(tensor_t self, float value, size_t begin, size_t len) {
+        tt_assert(self.get() == this, "can't be here!");
+        auto ret = impl()->op_fill(self, value, begin, len);
         tt_check(ret, "zero");
     }
     virtual ComputingReturn op_linear(tensor_t self, tensor_t w, tensor_t b, tensor_t y) {

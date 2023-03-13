@@ -11,27 +11,33 @@
 #include "config.hpp"
 #include "attention.hpp"
 
-/*
-void AttentionBlock::run(ncclComm_t comm) {
-    tt::tensor_t x = tt::create_cuda_float( {SUB_BATCH, MAX_LENGTH, HIDDEN_SIZE} );
+void CausalSelfAttention::test() {
+    tt::tensor_t x = tt::create_cuda_float( {8, 8, HIDDEN_SIZE} );
     tt::tensor_t w = tt::create_cuda_float( {HIDDEN_SIZE * 3, HIDDEN_SIZE} );
     tt::tensor_t b = tt::create_cuda_float( {HIDDEN_SIZE * 3} );
 
-    tt::tensor_t y = tt::create_cuda_float( {SUB_BATCH, MAX_LENGTH, HIDDEN_SIZE * 3} );
+    tt::tensor_t y = tt::create_cuda_float( {8, 8, HIDDEN_SIZE * 3} );
 
+    w->op_fill(w, 1.0, 0, HIDDEN_SIZE * HIDDEN_SIZE * 3);
+    w->op_fill(w, 2.0, 0, HIDDEN_SIZE);
+    w->op_fill(w, 1.5, HIDDEN_SIZE, HIDDEN_SIZE);
+
+    b->op_fill(b, 1.0, 0, HIDDEN_SIZE * 3);
+    b->op_fill(b, -1.0, 0, 4);
+
+    x->op_fill(x, 3.14, 0, HIDDEN_SIZE * 8 * 8);
 
     auto start = std::chrono::high_resolution_clock::now();
     x->op_linear(x, w, b, y);
+    y->op_dump(y);
     auto stop = std::chrono::high_resolution_clock::now();
-
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
     std::cout << "time: " << duration.count() << std::endl;
 }
-*/
 
 CausalSelfAttention::CausalSelfAttention(const char* weights_file) {
     create_local_tensors();
-    out_w_->op_dump(out_w_);
 }
 
 CausalSelfAttention::CausalSelfAttention(std::vector<tt::tensor_t>& weights) {

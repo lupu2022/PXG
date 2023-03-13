@@ -39,7 +39,7 @@ ComputingReturn CUDATensor<DT>::op_dump(tensor_t self) {
         std::cout << std::endl;
         std::cout << "Last " << first8 << " : ";
         for(size_t i = 0; i < first8; i++) {
-            std::cout << local_first[i] << " ";
+            std::cout << local_last[i] << " ";
         }
         std::cout << std::endl;
         return TT_OK;
@@ -61,7 +61,23 @@ ComputingReturn CUDATensor<DT>::op_zero(tensor_t self) {
     return TT_TODO_ERROR;
 }
 
+template<DataType DT>
+ComputingReturn CUDATensor<DT>::op_fill(tensor_t self, float value, size_t begin, size_t len) {
+    if ( !ShapeType::is_dense(shape_, stride_) ) {
+        return TT_TODO_ERROR;
+    }
 
+    if ( DT == DataType::Float ) {
+        float* dst = (float *)data() + begin;
+        std::vector<float> src;
+        src.resize(len, value);
+
+        CUBLAS_CHECK( cublasSetVector(len, sizeof(float), src.data(), 1, dst, 1) );
+        return TT_OK;
+    }
+
+    return TT_TODO_ERROR;
+}
 
 template<DataType DT>
 ComputingReturn CUDATensor<DT>::op_linear(tensor_t self, tensor_t w_, tensor_t b_, tensor_t y_) {
