@@ -19,6 +19,7 @@ void ComputingContext::boot(int cud) {
     CUDA_CHECK( cudaStreamCreate(&cuda_stream) );
 
     CUBLAS_CHECK( cublasCreate_v2(&cublas_handle) );
+    CUBLAS_CHECK( cublasSetStream(cublas_handle, cuda_stream) );
     CUBLAS_CHECK( cublasLtCreate(&cublasLt_handle) );
 
     CUDNN_CHECK(cudnnCreate(&cudnn_handle));

@@ -1,10 +1,70 @@
+#include <algorithm>
+
 #include "cuda_tensor.hpp"
 #include "kernels/kernels.h"
 
 namespace tt {
 
 template<DataType DT>
-ComputingReturn CUDATensor<DT>::op_linear(tensor_t w_, tensor_t b_, tensor_t y_) {
+ComputingReturn CUDATensor<DT>::op_dump(tensor_t self) {
+    auto shape = shape_.vec();
+    size_t first8 = std::min(shape.back(), (size_t)8);
+
+    if ( DT == DataType::Float ) {
+        auto stream = ComputingContext::cuda_stream;
+        std::vector<float> local_first;
+        std::vector<float> local_last;
+
+        local_first.resize(first8, 0);
+        local_last.resize(first8, 0);
+
+        auto x = self->cuda_float();
+        CUDA_CHECK(cudaMemcpyAsync(local_first.data(), x->data(), local_first.size() * sizeof(float), cudaMemcpyDeviceToHost, stream));
+
+        std::vector<size_t> pos = shape;
+        for(int i = 0; i < pos.size() - 1; i++) {
+            pos[i] = shape[i] - 1;
+        }
+        pos.back() = shape.back() - first8;
+        void* src = (float *)x->data() + x->offset(pos);
+        CUDA_CHECK(cudaMemcpyAsync(local_last.data(), src, local_last.size() * sizeof(float), cudaMemcpyDeviceToHost, stream));
+
+        CUDA_CHECK(cudaStreamSynchronize(stream));
+
+        std::cout << "--------------------------" << std::endl;
+        std::cout << "First " << first8 << " : ";
+        for(size_t i = 0; i < first8; i++) {
+            std::cout << local_first[i] << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "Last " << first8 << " : ";
+        for(size_t i = 0; i < first8; i++) {
+            std::cout << local_first[i] << " ";
+        }
+        std::cout << std::endl;
+        return TT_OK;
+    }
+
+    return TT_TODO_ERROR;
+}
+
+template<DataType DT>
+ComputingReturn CUDATensor<DT>::op_zero(tensor_t self) {
+    if ( DT == DataType::Float ) {
+
+        void *dst = data();
+        int n = shape_.numel();
+        CUDA_CHECK( cudaMemset(dst, 0, n * sizeof(float)) );
+        return TT_OK;
+    }
+
+    return TT_TODO_ERROR;
+}
+
+
+
+template<DataType DT>
+ComputingReturn CUDATensor<DT>::op_linear(tensor_t self, tensor_t w_, tensor_t b_, tensor_t y_) {
     if ( DT == DataType::Float ) {
         auto x = this;
         auto w = w_->cuda_float();

@@ -180,36 +180,35 @@ using tensor_t = std::shared_ptr<tt::TensorType>;
 
 // low level API for implementing Transformer
 struct TransformerComputing {
-    virtual ComputingReturn dump() {
-
+    virtual ComputingReturn op_dump(tensor_t self) {
         return TT_TODO_ERROR;
     }
-    virtual ComputingReturn op_zero() {
-        return TT_TODO_ERROR;
-    }
-
-    virtual ComputingReturn op_linear(tensor_t w, tensor_t bias, tensor_t y) {
-        return TT_TODO_ERROR;
-    }
-    virtual ComputingReturn op_linear_backward(tensor_t x, tensor_t w, tensor_t _x, tensor_t _w, tensor_t _b) {
+    virtual ComputingReturn op_zero(tensor_t self) {
         return TT_TODO_ERROR;
     }
 
-    virtual ComputingReturn op_transpos_0213(tensor_t y) {
+    virtual ComputingReturn op_linear(tensor_t self, tensor_t w, tensor_t bias, tensor_t y) {
+        return TT_TODO_ERROR;
+    }
+    virtual ComputingReturn op_linear_backward(tensor_t self, tensor_t x, tensor_t w, tensor_t _x, tensor_t _w, tensor_t _b) {
         return TT_TODO_ERROR;
     }
 
-    virtual ComputingReturn op_qk(tensor_t k, tensor_t qk) {
-        return TT_TODO_ERROR;
-    }
-    virtual ComputingReturn op_qk_backward(tensor_t q, tensor_t k, tensor_t _q, tensor_t _k) {
+    virtual ComputingReturn op_transpos_0213(tensor_t self, tensor_t y) {
         return TT_TODO_ERROR;
     }
 
-    virtual ComputingReturn op_attn(tensor_t v, tensor_t attn) {
+    virtual ComputingReturn op_qk(tensor_t self, tensor_t k) {
         return TT_TODO_ERROR;
     }
-    virtual ComputingReturn op_attn_backward(tensor_t qk, tensor_t v, tensor_t _qk, tensor_t _v) {
+    virtual ComputingReturn op_qk_backward(tensor_t self, tensor_t q, tensor_t k, tensor_t _q, tensor_t _k) {
+        return TT_TODO_ERROR;
+    }
+
+    virtual ComputingReturn op_attn(tensor_t self, tensor_t v, tensor_t attn) {
+        return TT_TODO_ERROR;
+    }
+    virtual ComputingReturn op_attn_backward(tensor_t self, tensor_t qk, tensor_t v, tensor_t _qk, tensor_t _v) {
         return TT_TODO_ERROR;
     }
 };
@@ -332,40 +331,49 @@ public:
 
 
 public:
-    virtual ComputingReturn dump() {
-        auto ret = impl()->dump();
+    virtual ComputingReturn op_dump(tensor_t self) {
+        tt_assert(self.get() == this, "can't be here!");
+        auto ret = impl()->op_dump(self);
         tt_check(ret, "dump");
     }
-    virtual ComputingReturn op_zero() {
-        auto ret = impl()->op_zero();
+    virtual ComputingReturn op_zero(tensor_t self) {
+        tt_assert(self.get() == this, "can't be here!");
+        auto ret = impl()->op_zero(self);
         tt_check(ret, "zero");
     }
-    virtual ComputingReturn op_linear(tensor_t w, tensor_t b, tensor_t y) {
-        auto ret = impl()->op_linear(w, b, y);
+    virtual ComputingReturn op_linear(tensor_t self, tensor_t w, tensor_t b, tensor_t y) {
+        tt_assert(self.get() == this, "can't be here!");
+        auto ret = impl()->op_linear(self, w, b, y);
         tt_check(ret, "linear");
     }
-    virtual ComputingReturn op_linear_backward(tensor_t x, tensor_t w, tensor_t _x, tensor_t _w, tensor_t _b) {
-        auto ret = impl()->op_linear_backward(x, w, _x, _w, _b);
+    virtual ComputingReturn op_linear_backward(tensor_t self, tensor_t x, tensor_t w, tensor_t _x, tensor_t _w, tensor_t _b) {
+        tt_assert(self.get() == this, "can't be here!");
+        auto ret = impl()->op_linear_backward(self, x, w, _x, _w, _b);
         tt_check(ret, "linear_backward");
     }
-    virtual ComputingReturn op_transpos_0213(tensor_t y) {
-        auto ret = impl()->op_transpos_0213(y);
+    virtual ComputingReturn op_transpos_0213(tensor_t self, tensor_t y) {
+        tt_assert(self.get() == this, "can't be here!");
+        auto ret = impl()->op_transpos_0213(self, y);
         tt_check(ret, "transpose_0213");
     }
-    virtual ComputingReturn op_qk(tensor_t k, tensor_t qk) {
-        auto ret = impl()->op_qk(k, qk);
+    virtual ComputingReturn op_qk(tensor_t self, tensor_t k) {
+        tt_assert(self.get() == this, "can't be here!");
+        auto ret = impl()->op_qk(self, k);
         tt_check(ret, "qk");
     }
-    virtual ComputingReturn op_qk_backward(tensor_t q, tensor_t k, tensor_t _q, tensor_t _k) {
-        auto ret = impl()->op_qk_backward(q, k, _q, _k);
+    virtual ComputingReturn op_qk_backward(tensor_t self, tensor_t q, tensor_t k, tensor_t _q, tensor_t _k) {
+        tt_assert(self.get() == this, "can't be here!");
+        auto ret = impl()->op_qk_backward(self, q, k, _q, _k);
         tt_check(ret, "qk_backward");
     }
-    virtual ComputingReturn op_attn(tensor_t v, tensor_t attn) {
-        auto ret = impl()->op_attn(v, attn);
+    virtual ComputingReturn op_attn(tensor_t self, tensor_t v, tensor_t attn) {
+        tt_assert(self.get() == this, "can't be here!");
+        auto ret = impl()->op_attn(self, v, attn);
         tt_check(ret, "attn");
     }
-    virtual ComputingReturn op_attn_backward(tensor_t qk, tensor_t v, tensor_t _qk, tensor_t _v) {
-        auto ret = impl()->op_attn_backward(qk, v, _qk, _v);
+    virtual ComputingReturn op_attn_backward(tensor_t self, tensor_t qk, tensor_t v, tensor_t _qk, tensor_t _v) {
+        tt_assert(self.get() == this, "can't be here!");
+        auto ret = impl()->op_attn_backward(self, qk, v, _qk, _v);
         tt_check(ret, "attn_backward");
     }
 

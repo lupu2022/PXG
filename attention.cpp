@@ -31,7 +31,7 @@ void AttentionBlock::run(ncclComm_t comm) {
 
 CausalSelfAttention::CausalSelfAttention(const char* weights_file) {
     create_local_tensors();
-    // TODO
+    out_w_->op_dump(out_w_);
 }
 
 CausalSelfAttention::CausalSelfAttention(std::vector<tt::tensor_t>& weights) {
@@ -61,10 +61,10 @@ void CausalSelfAttention::create_local_tensors() {
 }
 
 void CausalSelfAttention::zero_grad() {
-    qkv_w_->op_zero();
-    qkv_b_->op_zero();
-    out_w_->op_zero();
-    out_b_->op_zero();
+    qkv_w_->op_zero(qkv_w_);
+    qkv_b_->op_zero(qkv_b_);
+    out_w_->op_zero(out_w_);
+    out_b_->op_zero(out_b_);
 }
 
 std::vector<tt::tensor_t> CausalSelfAttention::weights() {

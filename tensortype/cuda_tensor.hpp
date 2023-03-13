@@ -101,7 +101,18 @@ struct CUDATensor : public TransformerComputing {
         return create_cudnn_td_with( shape_.vec() );
     }
 
-    virtual ComputingReturn op_linear(tensor_t w, tensor_t b, tensor_t y);
+    size_t offset(const std::vector<size_t>& pos) {
+        size_t at = 0;
+        for (size_t i = 0; i < pos.size(); i++) {
+            at += stride_[i] * pos[i] ;
+        }
+        return at;
+    }
+
+    // Interfaces from TransformerComputing
+    virtual ComputingReturn op_dump(tensor_t self);
+    virtual ComputingReturn op_zero(tensor_t self);
+    virtual ComputingReturn op_linear(tensor_t self, tensor_t w, tensor_t b, tensor_t y);
 
 private:
     void*                       mem_;
