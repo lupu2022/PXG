@@ -102,7 +102,6 @@ struct CUDATensor : public TransformerComputing {
     }
 
     virtual ComputingReturn op_linear(tensor_t w, tensor_t b, tensor_t y);
-    //virtual std::variant<ComputingReturn, std::vector<tensor_t>> op_split_qkv(tensor_t x, int heads);
 
 private:
     void*                       mem_;

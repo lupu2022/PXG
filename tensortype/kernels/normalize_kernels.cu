@@ -5,8 +5,8 @@
 #include "block_reduce.h"
 #include "kernels.h"
 
-namespace cg = cooperative_groups;
 namespace cuda {
+
 const float LN_EPSILON = 1e-8f;
 #define TILE_DIM 32
 
@@ -162,13 +162,13 @@ void launch_layer_norm(float *ln_res, float *vars, float *means,
 */
 
 template <typename T>
-void launch_layer_norm<T>(T *ln_res, T *vars, T *means,
+void launch_layer_norm(T *ln_res, T *vars, T *means,
                           const T *inp, const T *scale,
                           const T *bias, int batch_size, int hidden_dim,
                           cudaStream_t stream) {
   int n = 32 / sizeof(T);
   if (hidden_dim % n != 0) {
-    throw std::runtime_error("violate hidden_dim % 4(float) 8(__half) = 0");
+      throw ::std::runtime_error("violate hidden_dim % 4(float) 8(__half) = 0");
   }
   hidden_dim /= n;
   int nthread = min(((hidden_dim + 31) / 32) * 32, MAX_THREADS);
@@ -180,7 +180,13 @@ void launch_layer_norm<T>(T *ln_res, T *vars, T *means,
 }
 
 template <>
-void launch_layer_norm<float>(__half *ln_res, __half *vars, __half *means,
+void launch_layer_norm<float>(float *ln_res, float *vars, float *means,
+                              const float *inp, const float *scale,
+                              const float *bias, int batch_size, int hidden_dim,
+                              cudaStream_t stream); 
+
+template <>
+void launch_layer_norm<__half>(__half *ln_res, __half *vars, __half *means,
                                const __half *inp, const __half *scale,
                                const __half *bias, int batch_size,
                                int hidden_dim, cudaStream_t stream);

@@ -180,6 +180,10 @@ using tensor_t = std::shared_ptr<tt::TensorType>;
 
 // low level API for implementing Transformer
 struct TransformerComputing {
+    virtual ComputingReturn dump() {
+
+        return TT_TODO_ERROR;
+    }
     virtual ComputingReturn op_zero() {
         return TT_TODO_ERROR;
     }
@@ -328,6 +332,10 @@ public:
 
 
 public:
+    virtual ComputingReturn dump() {
+        auto ret = impl()->dump();
+        tt_check(ret, "dump");
+    }
     virtual ComputingReturn op_zero() {
         auto ret = impl()->op_zero();
         tt_check(ret, "zero");
